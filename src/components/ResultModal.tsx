@@ -36,7 +36,43 @@ export const ResultModal = ({
     return expression.replace(/\*/g, "×").replace(/\//g, "÷");
   };
 
+  const getRankTrophy = (index: number): string | null => {
+    if (index === 0) {
+      return "🥇";
+    }
+    if (index === 1) {
+      return "🥈";
+    }
+    if (index === 2) {
+      return "🥉";
+    }
+    if (index === 3) {
+      return "🥄";
+    }
+    return null;
+  };
+
   const otherSolutions = solutions;
+  const getYourSolutionIcon = (): string | null => {
+    if (!latestAttempt) {
+      return null;
+    }
+
+    if (latestAttempt.status !== "exact") {
+      return "❌";
+    }
+
+    const numbersUsed = Math.max(1, latestAttempt.operatorCount + 1);
+    const rankIndex = otherSolutions.findIndex(
+      (solution) => solution.numbersUsed === numbersUsed,
+    );
+    if (rankIndex < 0) {
+      return "✅";
+    }
+
+    return getRankTrophy(rankIndex);
+  };
+  const yourSolutionIcon = getYourSolutionIcon();
 
   return (
     <div className="modal-backdrop" role="dialog" aria-modal="true">
@@ -62,7 +98,14 @@ export const ResultModal = ({
                     : "solution-card solution-card-your solution-card-your-fail"
                 }
               >
-                <p className="solution-label-your">Your Solution</p>
+                <div className="solution-your-head">
+                  <p className="solution-label-your">Your Solution</p>
+                  {yourSolutionIcon ? (
+                    <span className="solution-your-icon" aria-hidden="true">
+                      {yourSolutionIcon}
+                    </span>
+                  ) : null}
+                </div>
                 <p className="solution-expression solution-expression-your">
                   {formatExpression(latestAttempt.expression)}
                 </p>
@@ -72,16 +115,24 @@ export const ResultModal = ({
             <div className="solution-card">
               <p className="eyebrow">Other Solutions</p>
               <ul className="solution-list">
-                {otherSolutions.map((solution, index) => (
-                  <li
-                    key={`${solution.numbersUsed}-${index}`}
-                    className="solution-item"
-                  >
-                    <p className="solution-expression">
-                      {formatExpression(solution.expression)}
-                    </p>
-                  </li>
-                ))}
+                {otherSolutions.map((solution, index) => {
+                  const trophy = getRankTrophy(index);
+                  return (
+                    <li
+                      key={`${solution.numbersUsed}-${index}`}
+                      className="solution-item"
+                    >
+                      <p className="solution-expression solution-expression-ranked">
+                        {trophy ? (
+                          <span className="solution-trophy" aria-hidden="true">
+                            {trophy}
+                          </span>
+                        ) : null}
+                        <span>{formatExpression(solution.expression)}</span>
+                      </p>
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           </>
