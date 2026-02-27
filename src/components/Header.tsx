@@ -26,17 +26,41 @@ export const Header = ({
         </p>
       </div>
       <div className="header-actions">
-        <button type="button" onClick={onOpenResult} className="ghost-btn">
-          Result
+        <button
+          type="button"
+          onClick={onOpenResult}
+          className="ghost-btn header-icon-btn"
+          aria-label="Open result"
+          title="Result"
+        >
+          <span className="header-icon-glyph" aria-hidden="true">🏁</span>
         </button>
-        <button type="button" onClick={onOpenStats} className="ghost-btn">
-          Stats
+        <button
+          type="button"
+          onClick={onOpenStats}
+          className="ghost-btn header-icon-btn"
+          aria-label="Open stats"
+          title="Stats"
+        >
+          <span className="header-icon-glyph" aria-hidden="true">📊</span>
         </button>
-        <button type="button" onClick={onOpenHelp} className="ghost-btn">
-          How to Play
+        <button
+          type="button"
+          onClick={onOpenHelp}
+          className="ghost-btn header-icon-btn"
+          aria-label="Open help"
+          title="How to Play"
+        >
+          <span className="header-icon-glyph" aria-hidden="true">❓</span>
         </button>
-        <button type="button" onClick={onToggleTheme} className="ghost-btn">
-          {theme === 'dark' ? 'Light' : 'Dark'}
+        <button
+          type="button"
+          onClick={onToggleTheme}
+          className="ghost-btn header-icon-btn"
+          aria-label={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
+          title={theme === 'dark' ? 'Light Theme' : 'Dark Theme'}
+        >
+          <span className="header-icon-glyph" aria-hidden="true">{theme === 'dark' ? '☀️' : '🌙'}</span>
         </button>
       </div>
     </header>

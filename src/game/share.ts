@@ -1,12 +1,13 @@
 import type { AttemptOutcome } from './types';
 
-export const attemptToShareRow = (attempt: AttemptOutcome): string => {
-  if (attempt.status === 'exact') {
-    const score = attempt.score ?? Math.max(1, attempt.operatorCount + 1);
-    return '🟩'.repeat(Math.max(1, score));
-  }
+const getNumbersUsed = (attempt: AttemptOutcome): number => {
+  return Math.max(1, attempt.operatorCount + 1);
+};
 
-  return '⬛';
+export const attemptToShareRow = (attempt: AttemptOutcome): string => {
+  const count = getNumbersUsed(attempt);
+  const square = attempt.status === 'exact' ? '🟩' : '⬛';
+  return square.repeat(count);
 };
 
 export const buildShareText = (puzzleNumber: number, attempts: AttemptOutcome[]): string => {

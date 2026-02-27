@@ -251,6 +251,49 @@ export const findBestExactSolution = (numbers: number[], target: number): ExactS
   return null;
 };
 
+export const findExactSolutionUsingNumberCount = (
+  numbers: number[],
+  target: number,
+  numbersUsed: number
+): ExactSolution | null => {
+  if (numbersUsed < 1 || numbersUsed > numbers.length) {
+    return null;
+  }
+
+  const subsets = allNonEmptySubsets(numbers);
+  for (const subset of subsets) {
+    if (subset.length !== numbersUsed) {
+      continue;
+    }
+
+    const expression = findExpressionWithAllNumbers(subset, target);
+    if (expression === null) {
+      continue;
+    }
+
+    return {
+      expression: stripOuterParens(expression),
+      numbersUsed,
+      value: target
+    };
+  }
+
+  return null;
+};
+
+export const findAllExactSolutions = (numbers: number[], target: number): ExactSolution[] => {
+  const solutions: ExactSolution[] = [];
+
+  for (let numbersUsed = numbers.length; numbersUsed >= 1; numbersUsed -= 1) {
+    const solution = findExactSolutionUsingNumberCount(numbers, target, numbersUsed);
+    if (solution !== null) {
+      solutions.push(solution);
+    }
+  }
+
+  return solutions;
+};
+
 export const hasExactSolution = (numbers: number[], target: number): boolean => {
   return findBestExactOperatorCount(numbers, target) !== null;
 };

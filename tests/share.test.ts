@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildShareText } from '../src/game/share';
+import { attemptToShareRow, buildShareText } from '../src/game/share';
 import type { AttemptOutcome } from '../src/game/types';
 
 describe('share formatting', () => {
@@ -16,5 +16,17 @@ describe('share formatting', () => {
     expect(share).not.toContain('100');
     expect(share).not.toContain('*');
     expect(share).not.toContain('925');
+  });
+
+  it('uses numbers-used count for fail rows', () => {
+    const attempt: AttemptOutcome = {
+      status: 'fail',
+      expression: '10 + 5 - 2',
+      value: 13,
+      operatorCount: 2,
+      score: null
+    };
+
+    expect(attemptToShareRow(attempt)).toBe('⬛⬛⬛');
   });
 });

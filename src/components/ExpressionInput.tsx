@@ -7,7 +7,6 @@ interface ExpressionInputProps {
   canInsertRightParen: boolean;
   canBackspace: boolean;
   onSubmit: () => void;
-  onClear: () => void;
   onInsertOperator: (operator: '+' | '-' | '*' | '/') => void;
   onInsertLeftParen: () => void;
   onInsertRightParen: () => void;
@@ -18,7 +17,7 @@ const OPERATORS: Array<{ value: '+' | '-' | '*' | '/'; label: string }> = [
   { value: '+', label: '+' },
   { value: '-', label: '-' },
   { value: '*', label: '×' },
-  { value: '/', label: '/' }
+  { value: '/', label: '÷' }
 ];
 
 export const ExpressionInput = ({
@@ -28,7 +27,6 @@ export const ExpressionInput = ({
   canInsertRightParen,
   canBackspace,
   onSubmit,
-  onClear,
   onInsertOperator,
   onInsertLeftParen,
   onInsertRightParen,
@@ -46,7 +44,7 @@ export const ExpressionInput = ({
           <button
             key={operator.value}
             type="button"
-            className="operator-btn"
+            className="operator-btn operator-btn-symbol"
             onClick={() => onInsertOperator(operator.value)}
             disabled={disabled || !canInsertOperator}
           >
@@ -74,9 +72,6 @@ export const ExpressionInput = ({
       <div className="keyboard-row keyboard-row-actions">
         <button type="submit" className="primary-btn" disabled={disabled}>
           Submit
-        </button>
-        <button type="button" className="ghost-btn" onClick={onClear} disabled={disabled}>
-          Clear
         </button>
         <button
           type="button"

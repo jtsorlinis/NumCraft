@@ -86,8 +86,9 @@ input {
 
 .header-actions {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 0.5rem;
+  align-items: center;
 }
 
 .layout {
@@ -233,13 +234,17 @@ input {
 }
 
 .keyboard-row-actions {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .action-row {
   display: flex;
   gap: 0.55rem;
   flex-wrap: wrap;
+}
+
+.result-actions {
+  justify-content: flex-end;
 }
 
 .operator-btn {
@@ -249,6 +254,14 @@ input {
   border-radius: 10px;
   padding: 0.45rem;
   cursor: pointer;
+  font-size: 1.18rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.operator-btn-symbol {
+  font-size: 1.34rem;
+  font-weight: 800;
 }
 
 .primary-btn,
@@ -268,6 +281,20 @@ input {
   background: transparent;
   border-color: var(--line);
   color: var(--text);
+}
+
+.header-icon-btn {
+  width: 2.3rem;
+  height: 2.3rem;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.header-icon-glyph {
+  font-size: 1.1rem;
+  line-height: 1;
 }
 
 .primary-btn:disabled,
@@ -369,11 +396,62 @@ input {
   margin: 0.7rem 0;
 }
 
+.solution-card-your {
+  border-width: 2px;
+}
+
+.solution-card-your-exact {
+  border-color: #1e9f5c;
+}
+
+.solution-card-your-fail {
+  border-color: #111111;
+}
+
+.solution-label-your {
+  margin: 0;
+  color: var(--text);
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.solution-card-best {
+  border-width: 2px;
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+.solution-list {
+  list-style: none;
+  margin: 0.55rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.solution-item {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 0.55rem;
+}
+
 .solution-expression {
-  margin: 0.4rem 0 0;
+  margin: 0;
   color: var(--text);
   font-weight: 600;
   word-break: break-word;
+}
+
+.solution-expression-best {
+  font-size: 1.08rem;
+  font-weight: 700;
+}
+
+.solution-expression-your {
+  margin-top: 0.35rem;
+  font-size: 1.22rem;
+  font-weight: 800;
 }
 
 .share-block {
@@ -431,6 +509,21 @@ input {
   .ghost-btn {
     padding: 0.5rem 0.35rem;
     font-size: 0.92rem;
+  }
+
+  .operator-btn {
+    font-size: 1.08rem;
+    line-height: 1;
+  }
+
+  .operator-btn-symbol {
+    font-size: 1.2rem;
+  }
+
+  .header-icon-btn {
+    width: 2.1rem;
+    height: 2.1rem;
+    padding: 0;
   }
 
   .chip {

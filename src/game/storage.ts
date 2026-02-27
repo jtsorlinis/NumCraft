@@ -4,6 +4,7 @@ import type { DailyProgress, GameStats } from './types';
 const STORAGE_PREFIX = 'numcraft:v1';
 const STATS_KEY = `${STORAGE_PREFIX}:stats`;
 const THEME_KEY = `${STORAGE_PREFIX}:theme`;
+const HELP_SEEN_KEY = `${STORAGE_PREFIX}:help-seen`;
 
 const progressKey = (puzzleId: string): string => `${STORAGE_PREFIX}:daily:${puzzleId}`;
 
@@ -74,4 +75,20 @@ export const saveTheme = (theme: 'light' | 'dark'): void => {
   }
 
   localStorage.setItem(THEME_KEY, theme);
+};
+
+export const hasSeenHelpModal = (): boolean => {
+  if (typeof localStorage === 'undefined') {
+    return true;
+  }
+
+  return localStorage.getItem(HELP_SEEN_KEY) === 'true';
+};
+
+export const markHelpModalSeen = (): void => {
+  if (typeof localStorage === 'undefined') {
+    return;
+  }
+
+  localStorage.setItem(HELP_SEEN_KEY, 'true');
 };

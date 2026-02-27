@@ -1,35 +1,38 @@
-import { attemptToShareRow } from '../game/share';
 import type { ExactSolution } from '../game/solver';
 import type { AttemptOutcome } from '../game/types';
 
 interface ResultModalProps {
   open: boolean;
   isFinished: boolean;
-  attempts: AttemptOutcome[];
   bestScore: number | null;
-  bestSolution: ExactSolution | null;
+  latestAttempt: AttemptOutcome | null;
+  solutions: ExactSolution[];
   puzzleNumber: number;
   isPractice: boolean;
-  shareText: string;
   onClose: () => void;
-  onCopyShare: () => void;
+  onShare: () => void;
 }
 
 export const ResultModal = ({
   open,
   isFinished,
-  attempts,
   bestScore,
-  bestSolution,
+  latestAttempt,
+  solutions,
   puzzleNumber,
   isPractice,
-  shareText,
   onClose,
-  onCopyShare
+  onShare
 }: ResultModalProps): JSX.Element | null => {
   if (!open) {
     return null;
   }
+
+  const formatExpression = (expression: string): string => {
+    return expression.replace(/\*/g, '×').replace(/\//g, '÷');
+  };
+
+  const otherSolutions = solutions;
 
   return (
     <div className="modal-backdrop" role="dialog" aria-modal="true">
@@ -39,25 +42,39 @@ export const ResultModal = ({
           {isPractice ? `Practice #${puzzleNumber}` : `NumCraft #${puzzleNumber}`}
         </p>
 
-        <div className="modal-rows">
-          {attempts.map((attempt, index) => (
-            <div key={`${attempt.status}-${index}`}>{attemptToShareRow(attempt)}</div>
-          ))}
-        </div>
+        {isFinished && otherSolutions.length > 0 ? (
+          <>
+            {latestAttempt ? (
+              <div
+                className={
+                  latestAttempt.status === 'exact'
+                    ? 'solution-card solution-card-your solution-card-your-exact'
+                    : 'solution-card solution-card-your solution-card-your-fail'
+                }
+              >
+                <p className="solution-label-your">Your Solution</p>
+                <p className="solution-expression solution-expression-your">
+                  {formatExpression(latestAttempt.expression)}
+                </p>
+              </div>
+            ) : null}
 
-        {isFinished && bestSolution ? (
-          <div className="solution-card">
-            <p className="eyebrow">Best Known Solution</p>
-            <p className="solution-expression">{bestSolution.expression.replace(/\*/g, '×')}</p>
-            <p className="modal-note">{bestSolution.numbersUsed} numbers used</p>
-          </div>
+            <div className="solution-card">
+              <p className="eyebrow">Other Solutions</p>
+              <ul className="solution-list">
+                {otherSolutions.map((solution, index) => (
+                  <li key={`${solution.numbersUsed}-${index}`} className="solution-item">
+                    <p className="solution-expression">{formatExpression(solution.expression)}</p>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </>
         ) : null}
 
-        <pre className="share-block">{shareText}</pre>
-
-        <div className="action-row">
-          <button type="button" className="primary-btn" onClick={onCopyShare}>
-            Copy Share
+        <div className="action-row result-actions">
+          <button type="button" className="primary-btn" onClick={onShare}>
+            Share
           </button>
           <button type="button" className="ghost-btn" onClick={onClose}>
             Close
