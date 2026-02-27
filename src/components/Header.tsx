@@ -5,7 +5,6 @@ interface HeaderProps {
   onOpenStats: () => void;
   onOpenHelp: () => void;
   onToggleTheme: () => void;
-  onOpenResult: () => void;
 }
 
 export const Header = ({
@@ -14,8 +13,7 @@ export const Header = ({
   theme,
   onOpenStats,
   onOpenHelp,
-  onToggleTheme,
-  onOpenResult
+  onToggleTheme
 }: HeaderProps): JSX.Element => {
   return (
     <header className="header">
@@ -26,15 +24,6 @@ export const Header = ({
         </p>
       </div>
       <div className="header-actions">
-        <button
-          type="button"
-          onClick={onOpenResult}
-          className="ghost-btn header-icon-btn"
-          aria-label="Open result"
-          title="Result"
-        >
-          <span className="header-icon-glyph" aria-hidden="true">🏁</span>
-        </button>
         <button
           type="button"
           onClick={onOpenStats}

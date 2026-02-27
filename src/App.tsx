@@ -6,6 +6,7 @@ import { NumberChips } from "./components/NumberChips";
 import { PuzzleHeader } from "./components/PuzzleHeader";
 import { ResultModal } from "./components/ResultModal";
 import { StatsModal } from "./components/StatsModal";
+import { SubmitConfirmModal } from "./components/SubmitConfirmModal";
 import { Toast } from "./components/Toast";
 import { evaluateAst } from "./game/evaluator";
 import { parseExpression } from "./game/parser";
@@ -28,10 +29,12 @@ import type {
   DailyProgress,
   DailyPuzzle,
   Operator,
+  ValidationResult,
 } from "./game/types";
 import { validateExpression } from "./game/validator";
 
 const MAX_ATTEMPTS = 1;
+const TEST_MODE_ENABLED = import.meta.env.VITE_TEST_MODE === "true";
 
 type ExpressionTokenKind = "number" | "operator" | "leftParen" | "rightParen";
 
@@ -39,6 +42,11 @@ interface ExpressionToken {
   kind: ExpressionTokenKind;
   text: string;
   sourceIndex?: number;
+}
+
+interface PendingSubmission {
+  expression: string;
+  validation: ValidationResult;
 }
 
 const createInitialProgress = (puzzle: DailyPuzzle): DailyProgress => ({
@@ -101,18 +109,36 @@ const copyText = async (value: string): Promise<void> => {
   document.body.removeChild(textarea);
 };
 
+const createRandomPracticeSeed = (): string => {
+  if (
+    typeof crypto !== "undefined" &&
+    typeof crypto.randomUUID === "function"
+  ) {
+    return crypto.randomUUID();
+  }
+
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+};
+
 export default function App(): JSX.Element {
   const practiceSeed = useMemo(() => {
     const params = new URLSearchParams(window.location.search);
     return params.get("practice");
   }, []);
+  const [testPuzzleSeed, setTestPuzzleSeed] = useState<string>(() =>
+    createRandomPracticeSeed(),
+  );
 
   const puzzle = useMemo(() => {
+    if (TEST_MODE_ENABLED) {
+      return createPracticePuzzle(testPuzzleSeed);
+    }
+
     if (practiceSeed) {
       return createPracticePuzzle(practiceSeed);
     }
     return getTodayDailyPuzzle();
-  }, [practiceSeed]);
+  }, [practiceSeed, testPuzzleSeed]);
 
   const [progress, setProgress] = useState<DailyProgress>(() => {
     return normalizeProgress(puzzle, loadDailyProgress(puzzle.id));
@@ -126,12 +152,15 @@ export default function App(): JSX.Element {
   const [helpOpen, setHelpOpen] = useState(false);
   const [resultOpen, setResultOpen] = useState(false);
   const [statsOpen, setStatsOpen] = useState(false);
+  const [pendingSubmission, setPendingSubmission] =
+    useState<PendingSubmission | null>(null);
 
   const attemptsRemaining = Math.max(
     0,
     MAX_ATTEMPTS - progress.attempts.length,
   );
-  const inputDisabled = progress.finished || attemptsRemaining === 0;
+  const inputDisabled =
+    progress.finished || attemptsRemaining === 0 || pendingSubmission !== null;
   const shareText = buildShareText(puzzle.puzzleNumber, progress.attempts);
   const allSolutions = useMemo(
     () => findAllExactSolutions(puzzle.numbers, puzzle.target),
@@ -213,6 +242,13 @@ export default function App(): JSX.Element {
   useEffect(() => {
     saveDailyProgress(progress);
   }, [progress]);
+
+  useEffect(() => {
+    setProgress(normalizeProgress(puzzle, loadDailyProgress(puzzle.id)));
+    setExpressionTokens([]);
+    setResultOpen(false);
+    setPendingSubmission(null);
+  }, [puzzle]);
 
   useEffect(() => {
     if (toastMessage === null) {
@@ -323,17 +359,23 @@ export default function App(): JSX.Element {
     }
 
     if (!validation.isExact) {
-      const shouldSubmit = window.confirm(
-        `Your answer equals ${validation.value ?? "?"}, not ${puzzle.target}. Submit anyway?`,
-      );
-      if (!shouldSubmit) {
-        return;
-      }
+      setPendingSubmission({
+        expression: expressionText,
+        validation,
+      });
+      return;
     }
 
+    submitAttempt(expressionText, validation);
+  };
+
+  const submitAttempt = (
+    expression: string,
+    validation: ValidationResult,
+  ): void => {
     const attempt: AttemptOutcome = {
       status: validation.isExact ? "exact" : "fail",
-      expression: expressionText,
+      expression,
       value: validation.value ?? 0,
       operatorCount: validation.operatorCount,
       score: validation.score,
@@ -356,7 +398,20 @@ export default function App(): JSX.Element {
       };
     });
 
+    setPendingSubmission(null);
     setExpressionTokens([]);
+  };
+
+  const handleConfirmPendingSubmit = (): void => {
+    if (!pendingSubmission) {
+      return;
+    }
+
+    submitAttempt(pendingSubmission.expression, pendingSubmission.validation);
+  };
+
+  const handleCancelPendingSubmit = (): void => {
+    setPendingSubmission(null);
   };
 
   const handleBackspace = (): void => {
@@ -396,6 +451,16 @@ export default function App(): JSX.Element {
     }
   };
 
+  const handleNextPuzzle = (): void => {
+    setResultOpen(false);
+
+    if (!TEST_MODE_ENABLED) {
+      return;
+    }
+
+    setTestPuzzleSeed(createRandomPracticeSeed());
+  };
+
   return (
     <div className="app-shell">
       <Header
@@ -407,7 +472,6 @@ export default function App(): JSX.Element {
         onToggleTheme={() =>
           setTheme((previous) => (previous === "dark" ? "light" : "dark"))
         }
-        onOpenResult={() => setResultOpen(true)}
       />
 
       <main className="layout">
@@ -466,15 +530,24 @@ export default function App(): JSX.Element {
         stats={stats}
         onClose={() => setStatsOpen(false)}
       />
+      <SubmitConfirmModal
+        open={pendingSubmission !== null}
+        target={puzzle.target}
+        currentValue={pendingSubmission?.validation.value ?? null}
+        onConfirm={handleConfirmPendingSubmit}
+        onCancel={handleCancelPendingSubmit}
+      />
       <ResultModal
         open={resultOpen}
         isFinished={progress.finished}
+        isTestMode={TEST_MODE_ENABLED}
         bestScore={progress.bestScore}
         latestAttempt={latestAttempt}
         solutions={allSolutions}
         puzzleNumber={puzzle.puzzleNumber}
         isPractice={puzzle.isPractice}
         onShare={handleShare}
+        onNextPuzzle={handleNextPuzzle}
         onClose={() => setResultOpen(false)}
       />
       <Toast message={toastMessage} />

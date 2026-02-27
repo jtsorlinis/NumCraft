@@ -1,6 +1,8 @@
 {
   "compilerOptions": {
     "composite": true,
+    "noEmit": true,
+    "tsBuildInfoFile": "/tmp/numcraft-tsconfig.node.tsbuildinfo",
     "skipLibCheck": true,
     "module": "ESNext",
     "moduleResolution": "Bundler",
