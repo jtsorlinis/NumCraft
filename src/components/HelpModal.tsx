@@ -22,10 +22,10 @@ export const HelpModal = ({
 
         <ul className="help-list">
           <li>Use each number tile at most once.</li>
-          <li>You have one submitted attempt per puzzle.</li>
           <li>
             Every puzzle has exact solutions using 3, 4, 5, and 6 numbers.
           </li>
+          <li>The more numbers you use, the higher your score.</li>
         </ul>
         <br />
 
